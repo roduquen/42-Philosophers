@@ -6,7 +6,7 @@
 /*   By: roduquen <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/27 21:26:33 by roduquen          #+#    #+#             */
-/*   Updated: 2019/11/28 01:38:54 by roduquen         ###   ########.fr       */
+/*   Updated: 2019/11/28 01:46:35 by roduquen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ static inline int	init(t_data *data, char **av, t_philo **philo
 	data->time_to_eat = atoi(av[3]);
 	data->time_to_sleep = atoi(av[4]);
 	data->nbr_of_eating = atoi(av[5]);
+	data->running = 1;
 	*philo = (t_philo*)malloc(sizeof(t_philo) * data->nbr_philo);
 	memset(*philo, 0, sizeof(t_philo) * data->nbr_philo);
 	*mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t) * data->nbr_philo);
@@ -76,6 +77,7 @@ void				*philo_table(void *ptr)
 			{
 				printf("%d %d is dead\n", time / 1000 - (time / 1000) % 100, philo->nbr);
 				philo->state = DEAD;
+				philo->data->running = 0;
 				pthread_mutex_unlock(philo->mutex1);
 				pthread_mutex_unlock(philo->mutex2);
 			}
@@ -109,10 +111,10 @@ int					main(int ac, char **av)
 		ac++;
 	}
 	ac = 0;
-	while (ac < data.nbr_philo)
+	while (1)
 	{
-		pthread_join(philo[ac].thread, NULL);
-		pthread_mutex_destroy(&mutex[ac++]);
+		if (!data.running)
+			break ;
 	}
 	return (0);
 }

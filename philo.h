@@ -6,7 +6,7 @@
 /*   By: roduquen <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/27 22:29:25 by roduquen          #+#    #+#             */
-/*   Updated: 2019/11/28 01:23:32 by roduquen         ###   ########.fr       */
+/*   Updated: 2019/11/28 01:46:20 by roduquen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ typedef struct			s_data
 	int					time_to_sleep;
 	int					nbr_of_eating;
 	int					start_time;
+	int					running;
 }						t_data;
 
 typedef struct			s_philo
