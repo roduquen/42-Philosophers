@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo-one.c                                        :+:      :+:    :+:   */
+/*   philo_one.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: roduquen <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/27 21:26:33 by roduquen          #+#    #+#             */
-/*   Updated: 2019/11/28 15:57:14 by roduquen         ###   ########.fr       */
+/*   Updated: 2019/11/29 09:02:10 by roduquen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,36 +28,51 @@ static long	time_elapsed(long start_time)
 	return (change);
 }
 
-static int	check_each_philos(t_philo *philo, t_data *data
-	, pthread_mutex_t *mutex)
+static int	leave_philos(t_philo *philo, t_data *data
+		, pthread_mutex_t *mutex, long total)
 {
 	int		i;
-	long	change;
 
+	pthread_mutex_lock(&mutex[data->nbr_philo]);
+	printf("%ld %d died\n", total, i + 1);
 	i = 0;
-	change = time_elapsed(data->start_time);
-	while (i < data->nbr_philo)
+	while (i <= data->nbr_philo)
 	{
-		if (philo[i].state != EATING)
-			philo[i].time_to_die -= change;
-		else
-			philo[i].time_to_die = data->time_to_die;
-		if (philo[i].time_to_die <= 0)
-		{
-			pthread_mutex_lock(&mutex[data->nbr_philo]);
-			printf("%ld %d died\n", (long)500 / 1000, i + 1);
-			pthread_mutex_destroy(&mutex[0]);
-			exit(0);
-		}
+		pthread_mutex_destroy(&mutex[i]);
 		i++;
 	}
+	free(mutex);
+	free(philo);
 	return (SUCCESS);
 }
 
-static void	check_if_alive(t_philo *philo, pthread_mutex_t *mutex, t_data *data)
+static int	check_each_philos(t_philo *philo, t_data *data
+		, pthread_mutex_t *mutex)
 {
+	int		i;
+	long	change;
+	long	total;
+
+	total = 0;
 	while (1)
-		check_each_philos(philo, data, mutex);
+	{
+		i = 0;
+		change = time_elapsed(data->start_time);
+		total += change;
+		while (i < data->nbr_philo)
+		{
+			if (philo[i].state != EATING)
+			{
+				philo[i].time_to_die -= change;
+				if (philo[i].time_to_die <= 0)
+					return (leave_philos(philo, data, mutex, total / 1000));
+			}
+			else
+				philo[i].time_to_die = data->time_to_die;
+			i++;
+		}
+	}
+	return (SUCCESS);
 }
 
 int			main(int ac, char **av)
@@ -70,6 +85,5 @@ int			main(int ac, char **av)
 		return (ERROR);
 	if (init(&data, av, &philo, &mutex) == ERROR)
 		return (ERROR);
-	check_if_alive(philo, mutex, &data);
-	return (0);
+	return (check_each_philos(philo, &data, mutex));
 }
